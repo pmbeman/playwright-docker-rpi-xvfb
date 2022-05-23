@@ -1,4 +1,6 @@
 from playwright.sync_api import sync_playwright
+from pyvirtualdisplay import Display
+from time import sleep
 import requests
 import re
 import time
@@ -10,15 +12,17 @@ import pymongo
 
 def get_last_video_url(username):
     with sync_playwright() as p:
-        browser = p.chromium.launch()
-        browser = browser.new_context(
-            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36")
+        display = Display(visible=False, size=(800, 602))
+        display.start()
+        sleep(5)
+        browser = p.chromium.launch(headless=False)
         page = browser.new_page()
         page.goto("https://fing.fingil.workers.dev/@{}".format(username))
         latest_video = page.query_selector(
             'xpath=/html/body/section[2]/div[1]/article[1]/div/div[3]/div[1]/a[2]')
         url = latest_video.get_property('href')
         browser.close()
+        display.stop()
         return url
 
 def get_download_url(username):
