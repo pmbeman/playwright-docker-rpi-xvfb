@@ -9,32 +9,25 @@ import json
 import pymongo
 
 def get_last_video_url(username):
-	    with sync_playwright() as p:
-        	display = Display(visible=False, size=(800, 602))
-        	display.start()
-        	sleep(5)
-        	browser = p.chromium.launch(headless=False)
-        	page = browser.new_page()
-        	page.goto("https://fing.fingil.workers.dev/@{}".format(username))
-        	latest_video = page.query_selector('xpath=/html/body/section[2]/div[1]/article[1]/div/div[3]/div[1]/a[2]')
-        	url = latest_video.get_property('href')
-        	browser.close()
-        	display.stop()
-        	print(url.text)
-        	return url
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        browser = browser.new_context(
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36")
+        page = browser.new_page()
+        page.goto("https://fing.fingil.workers.dev/@{}".format(username))
+        latest_video = page.query_selector(
+            'xpath=/html/body/section[2]/div[1]/article[1]/div/div[3]/div[1]/a[2]')
+        url = latest_video.get_property('href')
+        browser.close()
+        return url
 
 def get_download_url(username):
-    print("get_download_url def started")
-	url = get_last_video_url(username)
-    if url == None:
-        return None
+    url = get_last_video_url(username)
     url = str(url) + '/'
-    print(username)
     video_id = re.findall(
-        r'https\:\/\/www\.tiktok\.com\/@{}\/video\/(.*?)\/'.format(username), url)[0]
+        r'https\:\/\/www\.tiktok\.com\/@majhc\/video\/(.*?)\/', url)[0]
     resopnses = requests.get(
         'https://api-v1.majhcc.com/api/tk?url={}'.format(url))
-    print(resopnses.text)
     return resopnses.json()['link'], video_id
 
 #connect mongo
