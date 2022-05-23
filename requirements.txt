@@ -1,1 +1,7 @@
 PyVirtualDisplay==2.2
+instagrapi
+requests
+moviepy
+playwright
+pymongo[srv]
+dnspython
